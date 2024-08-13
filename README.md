@@ -1,5 +1,15 @@
 # memory-allocator in C
 
+## Test
+- Run the following command to test:
+```terminal
+./bin/test
+```
+- If changes are made to mem_alloc.c, to test, compile using:
+```terminal
+gcc -o ./bin/test test.c mem_alloc.c -pthread
+```
+
 ## Virtual Address Space
 
 - Text section: Holds the binary code that the processor executes.
