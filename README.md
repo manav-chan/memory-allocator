@@ -5,7 +5,7 @@
 ```terminal
 ./bin/test
 ```
-- If changes are made to mem_alloc.c, compile for testing using:
+- If changes are made to `mem_alloc.c`, compile for testing using:
 ```terminal
 gcc -o ./bin/test test.c mem_alloc.c -pthread
 ```
