@@ -11,7 +11,8 @@ gcc -o ./bin/test test.c mem_alloc.c -pthread
 ```
 ## Introduction
 - Implemented malloc(), calloc(), realloc() and free().
-- Used 
+- Implemented locking mechanism such that no 2 threads can concurrently access memory.
+- Made use of linked lists to handle non contiguous memory.
 ## Virtual Address Space
 
 - Text section: Holds the binary code that the processor executes.
