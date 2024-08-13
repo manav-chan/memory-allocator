@@ -28,9 +28,10 @@ typedef union header header_t;
 
 // head and tail pointers to keep track of memory allocated.
 header_t *head, *tail;
+head = NULL, tail = NULL;
 
 // to prevent deadlocks, implementing locking mechanism so no 2 threads can concurrently access memory
-pthread_mutex_t global_malloc_lock;
+pthread_mutex_t global_memory_alloc_lock;
 
 /* 
 Calling sbrk(0) gives the current address of program break.
@@ -41,23 +42,28 @@ On failure, sbrk() returns (void*) -1.
 
 void* malloc(size_t size)
 {
-	size_t total_size;
 	void *block;
 	header_t *header;
-    
+	size_t total_size;
+
 	if (!size)
 		return NULL;
-	pthread_mutex_lock(&global_malloc_lock);
+
+	pthread_mutex_lock(&global_memory_alloc_lock);
+
+    // check if free block is available
 	header = get_free_block(size);
 	if (header) {
 		header->s.is_free = 0;
-		pthread_mutex_unlock(&global_malloc_lock);
+		pthread_mutex_unlock(&global_memory_alloc_lock);
 		return (void*)(header + 1);
 	}
+
+    // if no free block available, allocate new memory
 	total_size = sizeof(header_t) + size;
 	block = sbrk(total_size);
 	if (block == (void*) -1) {
-		pthread_mutex_unlock(&global_malloc_lock);
+		pthread_mutex_unlock(&global_memory_alloc_lock);
 		return NULL;
 	}
 	header = block;
@@ -69,19 +75,19 @@ void* malloc(size_t size)
 	if (tail)
 		tail->s.next = header;
 	tail = header;
-	pthread_mutex_unlock(&global_malloc_lock);
+	pthread_mutex_unlock(&global_memory_alloc_lock);
 	return (void*)(header + 1);
 }
 
 // first fit memory allocation algorithm
 header_t* get_free_block(size_t size)
 {
-	header_t *curr = head;
+	header_t *ptr = head;
 
-	while(curr) {
-		if (curr->s.is_free && curr->s.size >= size)
-			return curr;
-		curr = curr->s.next;
+	while(ptr) {
+		if (ptr->s.is_free && ptr->s.size >= size)
+			return ptr;
+		ptr = ptr->s.next;
 	}
 	return NULL;
 }
@@ -89,34 +95,41 @@ header_t* get_free_block(size_t size)
 // if block at end of heap, release it to OS otherwise mark it as free.
 void free(void *block)
 {
-	header_t *header, *tmp;
+	header_t *header, *ptr;
 	void *programbreak;
 
 	if (!block)
 		return;
-	pthread_mutex_lock(&global_malloc_lock);
+
+	pthread_mutex_lock(&global_memory_alloc_lock);
 	header = (header_t*)block - 1;
 
+    // get current program break
 	programbreak = sbrk(0);
+
+    // remove block from end of heap
 	if ((char*)block + header->s.size == programbreak) {
 		if (head == tail) {
 			head = tail = NULL;
-		} else {
-			tmp = head;
-			while (tmp) {
-				if(tmp->s.next == tail) {
-					tmp->s.next = NULL;
-					tail = tmp;
+		} 
+        else {
+			ptr = head;
+			while (ptr) {
+				if(ptr->s.next == tail) {
+					ptr->s.next = NULL;
+					tail = ptr;
 				}
-				tmp = tmp->s.next;
+				ptr = ptr->s.next;
 			}
 		}
 		sbrk(0 - sizeof(header_t) - header->s.size);
-		pthread_mutex_unlock(&global_malloc_lock);
+		pthread_mutex_unlock(&global_memory_alloc_lock);
 		return;
 	}
+
+    // mark block as free if not at end of heap
 	header->s.is_free = 1;
-	pthread_mutex_unlock(&global_malloc_lock);
+	pthread_mutex_unlock(&global_memory_alloc_lock);
 }
 
 void* calloc(size_t num, size_t nsize)
@@ -126,15 +139,18 @@ void* calloc(size_t num, size_t nsize)
 
 	if (!num || !nsize)
 		return NULL;
+
 	size = num * nsize;
 
-    // check mul overflow 
+    // check multiply overflow
 	if (nsize != size / num)
 		return NULL;
 
 	block = malloc(size);
 	if (!block)
 		return NULL;
+
+    // initialize memory to 0
 	memset(block, 0, size);
 	return block;
 }
@@ -142,18 +158,20 @@ void* calloc(size_t num, size_t nsize)
 void* realloc(void *block, size_t size)
 {
 	header_t *header;
-	void *ret;
+	void *new_block;
 
 	if (!block || !size)
 		return malloc(size);
+    
 	header = (header_t*)block - 1;
 	if (header->s.size >= size)
 		return block;
-	ret = malloc(size);
-	if (ret) {
-		
-		memcpy(ret, block, header->s.size);
+
+    // allocate new memory and copy old memory to new memory then free old memory
+	new_block = malloc(size);
+	if (new_block) {
+		memcpy(new_block, block, header->s.size);
 		free(block);
 	}
-	return ret;
+	return new_block;
 }
