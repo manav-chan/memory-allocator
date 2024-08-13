@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
-
-void* malloc(size_t);
-header_t* get_free_block(size_t);
-void free(void*);
-void* calloc(size_t, size_t);
-void* realloc(void*, size_t);
+#include <unistd.h>
+#include <string.h>
 
 /*
 store size of allocated memory to free it later.
@@ -26,9 +22,14 @@ union header {
 };
 typedef union header header_t;
 
+void* malloc(size_t);
+header_t* get_free_block(size_t);
+void free(void*);
+void* calloc(size_t, size_t);
+void* realloc(void*, size_t);
+
 // head and tail pointers to keep track of memory allocated.
-header_t *head, *tail;
-head = NULL, tail = NULL;
+header_t *head = NULL, *tail = NULL;
 
 // to prevent deadlocks, implementing locking mechanism so no 2 threads can concurrently access memory
 pthread_mutex_t global_memory_alloc_lock;
