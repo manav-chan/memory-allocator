@@ -5,7 +5,7 @@
 ```terminal
 ./bin/test
 ```
-- If changes are made to mem_alloc.c, to test, compile using:
+- If changes are made to mem_alloc.c, compile for testing using:
 ```terminal
 gcc -o ./bin/test test.c mem_alloc.c -pthread
 ```
@@ -19,3 +19,5 @@ gcc -o ./bin/test test.c mem_alloc.c -pthread
 - Stack: Contains automatic variables, function arguments, and a copy of the base pointer.
 
 ![memlayout](https://github.com/user-attachments/assets/e4401f77-8aeb-4be7-b725-75eaf56aaf80)
+
+##
