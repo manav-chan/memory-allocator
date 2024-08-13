@@ -21,6 +21,7 @@ gcc -o ./bin/test test.c mem_alloc.c -pthread
 ![memlayout](https://github.com/user-attachments/assets/e4401f77-8aeb-4be7-b725-75eaf56aaf80)
 
 ## System Call - `sbrk()`
+brk or program break points to the end of the heap.
 sbrk() is a function used to manage a program's memory dynamically.
 
 - sbrk(0): returns current address of program break.
