@@ -20,4 +20,11 @@ gcc -o ./bin/test test.c mem_alloc.c -pthread
 
 ![memlayout](https://github.com/user-attachments/assets/e4401f77-8aeb-4be7-b725-75eaf56aaf80)
 
-##
+## System Call - sbrk()
+sbrk() is a function used to manage a program's memory dynamically.
+
+- sbrk(0): returns current address of program break.
+- sbrk(x): allocates memory and increments increments brk by x bytes.
+- sbrk(-x): releases memory and decrements brk by x bytes.
+- failure: sbrk() returns (void*) -1.
+
