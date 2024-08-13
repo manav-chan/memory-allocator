@@ -9,7 +9,9 @@
 ```terminal
 gcc -o ./bin/test test.c mem_alloc.c -pthread
 ```
-
+## Introduction
+- Implemented malloc(), calloc(), realloc() and free().
+- 
 ## Virtual Address Space
 
 - Text section: Holds the binary code that the processor executes.
