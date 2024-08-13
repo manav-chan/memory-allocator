@@ -20,7 +20,7 @@ gcc -o ./bin/test test.c mem_alloc.c -pthread
 
 ![memlayout](https://github.com/user-attachments/assets/e4401f77-8aeb-4be7-b725-75eaf56aaf80)
 
-## System Call - sbrk()
+## System Call - `sbrk()`
 sbrk() is a function used to manage a program's memory dynamically.
 
 - sbrk(0): returns current address of program break.
@@ -28,3 +28,6 @@ sbrk() is a function used to manage a program's memory dynamically.
 - sbrk(-x): releases memory and decrements brk by x bytes.
 - failure: sbrk() returns (void*) -1.
 
+## Mutex used for locking
+- `pthread_mutex_t` is used to ensure thread-safe memory allocation.
+- This mutex is used to lock critical sections in the memory allocation functions so no 2 threads can concurrently access memory.
